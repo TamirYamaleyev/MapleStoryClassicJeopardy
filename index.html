@@ -1,0 +1,4628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>MapleStory Jeopardy</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    font-family: Arial, Helvetica, sans-serif;
+    background:
+        radial-gradient(circle at top, #162d63 0%, #08142f 55%, #050b1b 100%);
+    color: white;
+}
+
+body {
+    padding: 20px;
+}
+
+button,
+input {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+button:disabled {
+    cursor: default;
+}
+
+.game {
+    width: min(1500px, 100%);
+    margin: 0 auto;
+}
+
+
+/* =========================================================
+   TOP BAR
+   ========================================================= */
+
+.topbar {
+    display: flex;
+    gap: 16px;
+    align-items: stretch;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+}
+
+.title-panel {
+    flex: 1 1 420px;
+    min-width: 280px;
+    background: rgba(9, 20, 50, 0.94);
+    border: 2px solid #d6b451;
+    border-radius: 12px;
+    padding: 16px 18px;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.28);
+}
+
+.title {
+    font-size: clamp(26px, 4vw, 42px);
+    font-weight: 900;
+    letter-spacing: 1px;
+    line-height: 1;
+    color: #f6d76d;
+    margin-bottom: 8px;
+}
+
+.mode-label {
+    font-size: 14px;
+    color: #b9c6e8;
+}
+
+.player-panel {
+    flex: 0 1 420px;
+    display: grid;
+    grid-template-columns: minmax(150px, 1fr) auto;
+    gap: 12px;
+    align-items: center;
+    background: rgba(9, 20, 50, 0.94);
+    border: 2px solid #4e6ea8;
+    border-radius: 12px;
+    padding: 12px;
+}
+
+.player-name-wrap label {
+    display: block;
+    font-size: 12px;
+    color: #aab9dc;
+    margin-bottom: 5px;
+}
+
+.player-name {
+    width: 100%;
+    border: 1px solid #5f78a9;
+    border-radius: 8px;
+    background: #08132c;
+    color: white;
+    padding: 10px 12px;
+    font-size: 16px;
+    outline: none;
+}
+
+.player-name:focus {
+    border-color: #f6d76d;
+}
+
+.score-box {
+    min-width: 145px;
+    text-align: center;
+    background: #071127;
+    border: 2px solid #d6b451;
+    border-radius: 10px;
+    padding: 8px 12px;
+}
+
+.score-label {
+    font-size: 11px;
+    color: #abbadb;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.score {
+    font-size: clamp(25px, 4vw, 38px);
+    font-weight: 900;
+    color: #f6d76d;
+    line-height: 1.1;
+    margin-top: 3px;
+}
+
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+.statusbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+}
+
+.progress-text {
+    color: #cbd5ef;
+    font-size: 14px;
+}
+
+.toolbar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.tool-btn {
+    border: 1px solid #536b9e;
+    background: #0b1b3b;
+    color: white;
+    padding: 9px 13px;
+    border-radius: 8px;
+    transition: 0.15s;
+}
+
+.tool-btn:hover:not(:disabled) {
+    background: #132a57;
+    border-color: #8fa8de;
+}
+
+.tool-btn:disabled {
+    opacity: 0.45;
+}
+
+.reset-btn {
+    border-color: #a36a6a;
+}
+
+.reset-btn:hover:not(:disabled) {
+    background: #4d1e24;
+    border-color: #d79393;
+}
+
+
+/* =========================================================
+   BOARD
+   ========================================================= */
+
+.board-wrap {
+    overflow-x: auto;
+    padding-bottom: 4px;
+}
+
+.board {
+    min-width: 900px;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(115px, 1fr));
+    grid-template-rows: auto repeat(7, minmax(82px, 1fr));
+    gap: 6px;
+}
+
+.category {
+    background:
+        linear-gradient(180deg, #173d78 0%, #0d2755 100%);
+    border: 2px solid #4f76b6;
+    border-radius: 8px;
+    padding: 10px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-weight: 900;
+    font-size: 16px;
+    line-height: 1.15;
+    min-height: 72px;
+    text-transform: uppercase;
+}
+
+.clue {
+    appearance: none;
+    border: 2px solid #34548f;
+    border-radius: 8px;
+    background:
+        linear-gradient(180deg, #0f3571 0%, #0a2550 100%);
+    color: #f6d76d;
+    font-size: clamp(20px, 3vw, 30px);
+    font-weight: 900;
+    min-height: 82px;
+    transition: 0.12s;
+}
+
+.clue:hover:not(:disabled) {
+    background:
+        linear-gradient(180deg, #17488e 0%, #103365 100%);
+    border-color: #7ea4eb;
+    transform: translateY(-1px);
+}
+
+.clue.used {
+    cursor: default;
+    background:
+        linear-gradient(180deg, #17233d 0%, #10192d 100%);
+    border-color: #283957;
+    color: #56627a;
+    transform: none;
+}
+
+.clue.used::after {
+    content: "USED";
+    display: block;
+    font-size: 10px;
+    letter-spacing: 1px;
+    margin-top: 4px;
+    color: #475773;
+}
+
+
+/* =========================================================
+   DOUBLE OR NOTHING BUTTON
+   ========================================================= */
+
+.don-section {
+    margin-top: 18px;
+}
+
+.don-button {
+    width: 100%;
+    min-height: 72px;
+    border: 3px solid #d6b451;
+    border-radius: 12px;
+    background:
+        linear-gradient(180deg, #5c4510 0%, #352708 100%);
+    color: #f6d76d;
+    font-size: clamp(20px, 4vw, 30px);
+    font-weight: 900;
+    letter-spacing: 1px;
+}
+
+.don-button:hover:not(:disabled) {
+    background:
+        linear-gradient(180deg, #765b16 0%, #4c380b 100%);
+}
+
+.don-button:disabled {
+    opacity: 0.45;
+}
+
+.don-subtitle {
+    text-align: center;
+    color: #9dafd3;
+    margin-top: 7px;
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   MODALS
+   ========================================================= */
+
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(2, 7, 18, 0.82);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    z-index: 100;
+}
+
+.modal-backdrop.hidden {
+    display: none;
+}
+
+.modal {
+    width: min(1000px, 100%);
+    max-height: 92vh;
+    overflow-y: auto;
+    background:
+        linear-gradient(180deg, #10295b 0%, #081631 100%);
+    border: 3px solid #d6b451;
+    border-radius: 16px;
+    box-shadow: 0 20px 70px rgba(0,0,0,0.55);
+    padding: 24px;
+}
+
+.question-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 22px;
+}
+
+.question-category {
+    font-weight: 900;
+    text-transform: uppercase;
+    color: #f6d76d;
+    font-size: 17px;
+}
+
+.question-value {
+    font-size: 24px;
+    font-weight: 900;
+    background: #0a1b3b;
+    border: 1px solid #5772a8;
+    border-radius: 8px;
+    padding: 7px 12px;
+}
+
+.question-number {
+    color: #aab9dc;
+    font-size: 13px;
+}
+
+.question-text {
+    min-height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 30px 18px;
+    border-radius: 12px;
+    background: rgba(3, 10, 28, 0.45);
+    border: 1px solid #2a477b;
+    font-size: clamp(25px, 5vw, 48px);
+    line-height: 1.18;
+    font-weight: 800;
+}
+
+
+/* =========================================================
+   ANSWER
+   ========================================================= */
+
+.answer-area {
+    margin-top: 18px;
+}
+
+.answer-hidden {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 110px;
+    border: 1px dashed #4d6799;
+    border-radius: 10px;
+    color: #9eafd2;
+    text-align: center;
+    padding: 20px;
+}
+
+.answer-visible {
+    display: block;
+    min-height: 110px;
+    background: #071127;
+    border: 2px solid #d6b451;
+    border-radius: 10px;
+    padding: 22px;
+    color: white;
+    font-size: clamp(20px, 3.5vw, 32px);
+    font-weight: 800;
+    line-height: 1.3;
+    text-align: center;
+}
+
+.answer-hidden.hidden,
+.answer-visible.hidden {
+    display: none;
+}
+
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+.modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+}
+
+.action-btn {
+    border: 0;
+    border-radius: 9px;
+    padding: 13px 18px;
+    min-height: 48px;
+    font-weight: 900;
+    transition: 0.12s;
+}
+
+.action-btn:hover:not(:disabled) {
+    filter: brightness(1.12);
+}
+
+.action-btn:disabled {
+    opacity: 0.42;
+}
+
+.reveal-btn {
+    background: #d6b451;
+    color: #101936;
+    min-width: 180px;
+}
+
+.close-btn {
+    background: #1f365e;
+    color: white;
+}
+
+
+/* =========================================================
+   NORMAL SCORING
+   ========================================================= */
+
+.score-actions {
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid #2f4775;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+}
+
+.score-help {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: #9db0d3;
+    font-size: 13px;
+}
+
+.score-result-btn {
+    background: #284975;
+    color: white;
+    border: 2px solid #476b9f;
+    min-height: 58px;
+    font-size: 15px;
+}
+
+.score-result-btn:hover:not(:disabled) {
+    background: #356194;
+    border-color: #7295c6;
+}
+
+.payout {
+    display: block;
+    margin-top: 3px;
+    font-size: 21px;
+    color: #f6d76d;
+}
+
+.score-result-btn.zero {
+    background: #3a4253;
+    border-color: #657087;
+}
+
+.no-score-btn {
+    grid-column: 1 / -1;
+    background: #445879;
+    color: white;
+}
+
+
+/* =========================================================
+   BGM
+   ========================================================= */
+
+.bgm-section {
+    display: none;
+    margin-top: 18px;
+    border-top: 1px solid #2f4775;
+    padding-top: 18px;
+}
+
+.bgm-player {
+    width: min(760px, 100%);
+    margin: 0 auto;
+    aspect-ratio: 16 / 9;
+    background: #000;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid #3c5786;
+}
+
+.bgm-player iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+
+/* =========================================================
+   DOUBLE OR NOTHING CATEGORY SELECTION
+   ========================================================= */
+
+.selection-modal {
+    width: min(820px, 100%);
+    background:
+        linear-gradient(180deg, #10295b 0%, #081631 100%);
+    border: 3px solid #d6b451;
+    border-radius: 16px;
+    box-shadow: 0 20px 70px rgba(0,0,0,0.55);
+    padding: 24px;
+}
+
+.selection-title {
+    font-size: 32px;
+    font-weight: 900;
+    color: #f6d76d;
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.selection-subtitle {
+    text-align: center;
+    color: #b8c7e4;
+    margin-bottom: 20px;
+    line-height: 1.4;
+}
+
+.category-selection-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.category-choice input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.category-choice label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-height: 68px;
+    padding: 10px;
+    border: 2px solid #426291;
+    border-radius: 10px;
+    background: #0a1d3f;
+    color: white;
+    font-weight: 900;
+    cursor: pointer;
+    transition: 0.15s;
+}
+
+.category-choice label:hover {
+    background: #12305f;
+    border-color: #7798ca;
+}
+
+.category-choice input:checked + label {
+    background: #5a4513;
+    border-color: #f0cf58;
+    color: #f6d76d;
+}
+
+.selection-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+}
+
+.start-don-btn {
+    background: #d6b451;
+    color: #101936;
+    min-width: 190px;
+}
+
+.selection-message {
+    text-align: center;
+    color: #9db0d3;
+    font-size: 13px;
+    margin-top: 12px;
+}
+
+
+/* =========================================================
+   DON GAMEPLAY
+   ========================================================= */
+
+.don-round-label {
+    text-align: center;
+    color: #f6d76d;
+    font-size: 18px;
+    font-weight: 900;
+    margin-bottom: 8px;
+}
+
+.don-weight {
+    text-align: center;
+    color: #b6c5e3;
+    font-size: 14px;
+    margin-bottom: 18px;
+}
+
+.don-correct-status {
+    text-align: center;
+    margin-top: 15px;
+    font-size: 16px;
+    color: #d9e4fb;
+}
+
+.don-current-bonus {
+    text-align: center;
+    font-size: 29px;
+    font-weight: 900;
+    color: #f6d76d;
+    margin-top: 5px;
+}
+
+.don-answer-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+}
+
+.don-correct-btn {
+    background: #3f8f52;
+    color: white;
+    min-width: 220px;
+}
+
+.don-undo-btn {
+    background: #445879;
+    color: white;
+    min-width: 180px;
+}
+
+.echo-btn {
+    background: #704b89;
+    color: white;
+    min-width: 250px;
+}
+
+.echo-btn:hover:not(:disabled) {
+    background: #895ba7;
+}
+
+
+/* =========================================================
+   ANSWER BANK
+   ========================================================= */
+
+.valid-answers-panel {
+    margin-top: 18px;
+    border-top: 1px solid #2f4775;
+    padding-top: 15px;
+}
+
+.valid-answers-toggle {
+    display: block;
+    margin: 0 auto;
+    border: 1px solid #536b9e;
+    border-radius: 8px;
+    background: #0b1b3b;
+    color: #d6e0f5;
+    padding: 9px 14px;
+}
+
+.valid-answers {
+    height: 210px;
+    overflow-y: auto;
+    margin-top: 12px;
+    background: #071127;
+    border: 1px solid #314a77;
+    border-radius: 9px;
+    padding: 10px 12px;
+    color: #cbd7ed;
+}
+
+.valid-answers.hidden {
+    display: none;
+}
+
+.answer-row {
+    padding: 6px 4px;
+    border-bottom: 1px solid #192d50;
+    font-size: 13px;
+    line-height: 1.25;
+}
+
+.answer-row:last-child {
+    border-bottom: none;
+}
+
+.answer-row.special {
+    color: #f6d76d;
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   DIAL
+   ========================================================= */
+
+.multiplier-panel {
+    margin-top: 18px;
+    border-top: 1px solid #2f4775;
+    padding-top: 18px;
+}
+
+.multiplier-title {
+    text-align: center;
+    font-size: 17px;
+    font-weight: 900;
+    color: #dbe5fa;
+}
+
+.multiplier-subtitle {
+    text-align: center;
+    color: #94a8cf;
+    font-size: 13px;
+    margin-top: 4px;
+}
+
+.dial {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.dial-column {
+    width: 70px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.dial-arrow {
+    width: 58px;
+    height: 36px;
+    border: 1px solid #6079a7;
+    border-radius: 7px;
+    background: #0a1b3b;
+    color: #dce7fb;
+    font-size: 20px;
+    font-weight: 900;
+}
+
+.dial-arrow:hover:not(:disabled) {
+    background: #183564;
+    border-color: #9ab1dc;
+}
+
+.dial-digit {
+    width: 64px;
+    height: 76px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:
+        linear-gradient(180deg, #111e39 0%, #070f20 100%);
+    border: 3px solid #8d99af;
+    border-radius: 8px;
+    font-family: "Courier New", monospace;
+    font-size: 44px;
+    font-weight: 900;
+    color: #f0f3f8;
+}
+
+.multiplier-value {
+    text-align: center;
+    margin-top: 14px;
+    font-size: 24px;
+    font-weight: 900;
+    color: #f6d76d;
+}
+
+.calculated-bonus {
+    text-align: center;
+    margin-top: 5px;
+    color: #9db0d3;
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   FINAL
+   ========================================================= */
+
+.final-modal {
+    width: min(800px, 100%);
+    background:
+        linear-gradient(180deg, #142e65 0%, #081631 100%);
+    border: 3px solid #d6b451;
+    border-radius: 18px;
+    box-shadow: 0 20px 80px rgba(0,0,0,0.6);
+    padding: 32px 24px;
+    text-align: center;
+}
+
+.final-label {
+    color: #f6d76d;
+    font-size: 19px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.final-title {
+    font-size: clamp(34px, 7vw, 64px);
+    font-weight: 900;
+    margin-top: 8px;
+    margin-bottom: 20px;
+}
+
+.final-score-label {
+    color: #aebddd;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+}
+
+.final-score {
+    font-size: clamp(55px, 12vw, 100px);
+    font-weight: 900;
+    line-height: 1;
+    color: #f6d76d;
+    margin: 8px 0 24px;
+}
+
+.final-breakdown {
+    background: rgba(3, 10, 28, 0.5);
+    border: 1px solid #38537f;
+    border-radius: 12px;
+    padding: 16px;
+    line-height: 1.7;
+    color: #c7d4ec;
+}
+
+.final-breakdown strong {
+    color: white;
+}
+
+.final-reset-btn {
+    margin-top: 20px;
+    background: #d6b451;
+    color: #101936;
+    min-width: 190px;
+}
+
+
+/* =========================================================
+   RESET
+   ========================================================= */
+
+.confirm-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(2, 7, 18, 0.76);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    z-index: 200;
+}
+
+.confirm-backdrop.hidden {
+    display: none;
+}
+
+.confirm-box {
+    width: min(460px, 100%);
+    background: #0c1c3d;
+    border: 2px solid #6d82ae;
+    border-radius: 12px;
+    padding: 22px;
+    box-shadow: 0 18px 55px rgba(0,0,0,0.5);
+}
+
+.confirm-title {
+    font-size: 22px;
+    font-weight: 900;
+    margin-bottom: 10px;
+    color: #f6d76d;
+}
+
+.confirm-text {
+    color: #c7d2e9;
+    line-height: 1.5;
+    margin-bottom: 18px;
+}
+
+.confirm-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    body {
+        padding: 10px;
+    }
+
+    .player-panel {
+        flex-basis: 100%;
+    }
+
+    .modal,
+    .selection-modal,
+    .final-modal {
+        padding: 16px;
+    }
+
+    .question-text {
+        min-height: 160px;
+    }
+
+    .score-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .score-help {
+        grid-column: 1;
+    }
+
+    .no-score-btn {
+        grid-column: 1;
+    }
+
+    .category-selection-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .board {
+        min-width: 820px;
+    }
+
+    .valid-answers {
+        height: 210px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="game">
+
+    <div class="topbar">
+
+        <div class="title-panel">
+
+            <div class="title">
+                MAPLESTORY JEOPARDY
+            </div>
+
+            <div class="mode-label">
+                Two-device manual-sync mode
+            </div>
+
+        </div>
+
+
+        <div class="player-panel">
+
+            <div class="player-name-wrap">
+
+                <label for="playerName">
+                    PLAYER NAME
+                </label>
+
+                <input
+                    id="playerName"
+                    class="player-name"
+                    type="text"
+                    maxlength="30"
+                    value="Player 1"
+                >
+
+            </div>
+
+
+            <div class="score-box">
+
+                <div class="score-label">
+                    Score
+                </div>
+
+                <div
+                    id="score"
+                    class="score"
+                >
+                    $0
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="statusbar">
+
+        <div
+            id="progressText"
+            class="progress-text"
+        >
+            0 / 49 clues used
+        </div>
+
+
+        <div class="toolbar">
+
+            <button
+                id="undoButton"
+                class="tool-btn"
+                type="button"
+                disabled
+            >
+                Undo Score
+            </button>
+
+
+            <button
+                id="resetButton"
+                class="tool-btn reset-btn"
+                type="button"
+            >
+                Reset Game
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <div class="board-wrap">
+
+        <div
+            id="board"
+            class="board"
+        ></div>
+
+    </div>
+
+
+    <div class="don-section">
+
+        <button
+            id="doubleOrNothingButton"
+            class="don-button"
+            type="button"
+        >
+            DOUBLE OR NOTHING
+        </button>
+
+        <div class="don-subtitle">
+            Final round — choose one category and build your bonus
+        </div>
+
+    </div>
+
+</div>
+
+
+<div
+    id="questionBackdrop"
+    class="modal-backdrop hidden"
+>
+
+    <div
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+    >
+
+        <div class="question-meta">
+
+            <div>
+
+                <div
+                    id="questionCategory"
+                    class="question-category"
+                ></div>
+
+                <div
+                    id="questionNumber"
+                    class="question-number"
+                ></div>
+
+            </div>
+
+
+            <div
+                id="questionValue"
+                class="question-value"
+            ></div>
+
+        </div>
+
+
+        <div
+            id="questionText"
+            class="question-text"
+        ></div>
+
+
+        <div
+            id="bgmSection"
+            class="bgm-section"
+        >
+
+            <div
+                id="bgmPlayer"
+                class="bgm-player"
+            ></div>
+
+        </div>
+
+
+        <div class="answer-area">
+
+            <div
+                id="answerHidden"
+                class="answer-hidden"
+            >
+                Answer hidden
+            </div>
+
+
+            <div
+                id="answerVisible"
+                class="answer-visible hidden"
+            ></div>
+
+        </div>
+
+
+        <div class="modal-actions">
+
+            <button
+                id="revealButton"
+                class="action-btn reveal-btn"
+                type="button"
+            >
+                Reveal Answer
+            </button>
+
+
+            <button
+                id="closeQuestionButton"
+                class="action-btn close-btn"
+                type="button"
+            >
+                Back to Board
+            </button>
+
+        </div>
+
+
+        <div class="score-actions">
+
+            <div class="score-help">
+                Reveal the answer, then select how many attempts it took.
+            </div>
+
+
+            <button
+                id="correctFirstButton"
+                class="action-btn score-result-btn"
+                type="button"
+                disabled
+            ></button>
+
+
+            <button
+                id="correctSecondButton"
+                class="action-btn score-result-btn"
+                type="button"
+                disabled
+            ></button>
+
+
+            <button
+                id="correctThirdButton"
+                class="action-btn score-result-btn"
+                type="button"
+                disabled
+            ></button>
+
+
+            <button
+                id="correctFourthButton"
+                class="action-btn score-result-btn"
+                type="button"
+                disabled
+            ></button>
+
+
+            <button
+                id="correctFifthButton"
+                class="action-btn score-result-btn zero"
+                type="button"
+                disabled
+            ></button>
+
+
+            <button
+                id="noScoreButton"
+                class="action-btn no-score-btn"
+                type="button"
+            >
+                No Score / Cancel Clue
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<div
+    id="selectionBackdrop"
+    class="modal-backdrop hidden"
+>
+
+    <div
+        class="selection-modal"
+        role="dialog"
+        aria-modal="true"
+    >
+
+        <div class="selection-title">
+            DOUBLE OR NOTHING
+        </div>
+
+
+        <div class="selection-subtitle">
+            Choose ONE category. Name as many valid items as you can.
+        </div>
+
+
+        <div
+            id="categorySelectionGrid"
+            class="category-selection-grid"
+        ></div>
+
+
+        <div
+            id="selectionCount"
+            class="selection-message"
+        >
+            Choose 1 category
+        </div>
+
+
+        <div class="selection-actions">
+
+            <button
+                id="cancelSelectionButton"
+                class="action-btn neutral-btn"
+                type="button"
+            >
+                Cancel
+            </button>
+
+
+            <button
+                id="startDonButton"
+                class="action-btn start-don-btn"
+                type="button"
+                disabled
+            >
+                Start Final Round
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<div
+    id="donBackdrop"
+    class="modal-backdrop hidden"
+>
+
+    <div
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+    >
+
+        <div class="don-round-label">
+            DOUBLE OR NOTHING
+        </div>
+
+
+        <div
+            id="donCategory"
+            class="question-category"
+            style="text-align:center;"
+        ></div>
+
+
+        <div
+            id="donWeight"
+            class="don-weight"
+        ></div>
+
+
+        <div
+            id="donQuestionText"
+            class="question-text"
+        ></div>
+
+
+        <div class="don-correct-status">
+            Correct answers:
+            <strong id="donCorrectCount">0</strong>
+        </div>
+
+
+        <div
+            id="donCurrentBonus"
+            class="don-current-bonus"
+        >
+            +0%
+        </div>
+
+
+        <div class="don-answer-buttons">
+
+            <button
+                id="donCorrectButton"
+                class="action-btn don-correct-btn"
+                type="button"
+            >
+                Correct Answer
+            </button>
+
+
+            <button
+                id="donUndoButton"
+                class="action-btn don-undo-btn"
+                type="button"
+                disabled
+            >
+                Undo Last Answer
+            </button>
+
+
+            <button
+                id="echoBonusButton"
+                class="action-btn echo-btn"
+                type="button"
+                style="display:none;"
+            >
+                Award Echo of Hero +25%
+            </button>
+
+        </div>
+
+
+        <div
+            class="valid-answers-panel"
+        >
+
+            <button
+                id="validAnswersToggle"
+                class="valid-answers-toggle"
+                type="button"
+                disabled
+            >
+                Show Answer Bank
+            </button>
+
+
+            <div
+                id="validAnswers"
+                class="valid-answers hidden"
+            ></div>
+
+        </div>
+
+
+        <div class="multiplier-panel">
+
+            <div class="multiplier-title">
+                FINAL BONUS
+            </div>
+
+
+            <div class="multiplier-subtitle">
+                The bonus follows the correct-answer count.
+                The dial is also manually adjustable.
+            </div>
+
+
+            <div class="dial">
+
+                <div class="dial-column">
+
+                    <button
+                        id="dialHundredsUp"
+                        class="dial-arrow"
+                        type="button"
+                    >
+                        ▲
+                    </button>
+
+
+                    <div
+                        id="dialHundreds"
+                        class="dial-digit"
+                    >
+                        0
+                    </div>
+
+
+                    <button
+                        id="dialHundredsDown"
+                        class="dial-arrow"
+                        type="button"
+                    >
+                        ▼
+                    </button>
+
+                </div>
+
+
+                <div class="dial-column">
+
+                    <button
+                        id="dialTensUp"
+                        class="dial-arrow"
+                        type="button"
+                    >
+                        ▲
+                    </button>
+
+
+                    <div
+                        id="dialTens"
+                        class="dial-digit"
+                    >
+                        0
+                    </div>
+
+
+                    <button
+                        id="dialTensDown"
+                        class="dial-arrow"
+                        type="button"
+                    >
+                        ▼
+                    </button>
+
+                </div>
+
+
+                <div class="dial-column">
+
+                    <button
+                        id="dialOnesUp"
+                        class="dial-arrow"
+                        type="button"
+                    >
+                        ▲
+                    </button>
+
+
+                    <div
+                        id="dialOnes"
+                        class="dial-digit"
+                    >
+                        0
+                    </div>
+
+
+                    <button
+                        id="dialOnesDown"
+                        class="dial-arrow"
+                        type="button"
+                    >
+                        ▼
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="multiplierValue"
+                class="multiplier-value"
+            >
+                +0%
+            </div>
+
+
+            <div
+                id="calculatedBonus"
+                class="calculated-bonus"
+            >
+                Answer bonus: +0%
+            </div>
+
+        </div>
+
+
+        <div class="modal-actions">
+
+            <button
+                id="finishGameButton"
+                class="action-btn reveal-btn"
+                type="button"
+            >
+                Finish Game
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<div
+    id="finalBackdrop"
+    class="modal-backdrop hidden"
+>
+
+    <div
+        class="final-modal"
+        role="dialog"
+        aria-modal="true"
+    >
+
+        <div class="final-label">
+            GAME COMPLETE
+        </div>
+
+
+        <div
+            id="finalPlayerName"
+            class="final-title"
+        >
+            Player 1
+        </div>
+
+
+        <div class="final-score-label">
+            FINAL SCORE
+        </div>
+
+
+        <div
+            id="finalScore"
+            class="final-score"
+        >
+            $0
+        </div>
+
+
+        <div
+            id="finalBreakdown"
+            class="final-breakdown"
+        ></div>
+
+
+        <button
+            id="finalResetButton"
+            class="action-btn final-reset-btn"
+            type="button"
+        >
+            Start Over
+        </button>
+
+    </div>
+
+</div>
+
+
+<div
+    id="confirmBackdrop"
+    class="confirm-backdrop hidden"
+>
+
+    <div class="confirm-box">
+
+        <div class="confirm-title">
+            Reset game?
+        </div>
+
+
+        <div class="confirm-text">
+            This will clear the score, reset all 49 clues,
+            and reset the Double or Nothing round.
+        </div>
+
+
+        <div class="confirm-actions">
+
+            <button
+                id="cancelResetButton"
+                class="action-btn neutral-btn"
+                type="button"
+            >
+                Cancel
+            </button>
+
+
+            <button
+                id="confirmResetButton"
+                class="action-btn danger-btn"
+                type="button"
+            >
+                Reset Everything
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   NORMAL GAME DATA
+   ========================================================= */
+
+const gameData = [
+
+    {
+        category: "ITEMS",
+
+        clues: [
+            {
+                question:
+                    "Which set of weapons was released after the launch of the game without any stat requirements and was almost always considered BiS for its level range",
+
+                answer:
+                    "Maple Weapons"
+            },
+
+            {
+                question:
+                    "What are the standard stats of the Zakum Helmet",
+
+                answer:
+                    "15 All-Stat"
+            },
+
+            {
+                question:
+                    "What is the name of the strongest Throwing Stars",
+
+                answer:
+                    "Ilbi / Crystal Ilbi / Balanced Fury"
+            },
+
+            {
+                question:
+                    "What was the cash-shop consumable that could prevent players from losing EXP upon death",
+
+                answer:
+                    "Safety Charm(s)"
+            },
+
+            {
+                question:
+                    "What was the name of the ETC item that let you play a MapleStory exclusive game with others in town",
+
+                answer:
+                    "Omok Set (Five in a Row) Memory game also accepted"
+            },
+
+            {
+                question:
+                    "Which of the 3 weapons available at character creation was the strongest",
+
+                answer:
+                    "Club"
+            },
+
+            {
+                question:
+                    "Which powerful buff item was rewarded from the Hanukkah questline in HappyVille during Christmas",
+
+                answer:
+                    "Gelt Chocolate (Hannukah Money)"
+            }
+        ]
+    },
+
+
+    {
+        category: "CLASSES",
+
+        clues: [
+            {
+                question:
+                    "What is the name of the Bowman Job Instructor",
+
+                answer:
+                    "Athena Pierce"
+            },
+
+            {
+                question:
+                    "What is the name of the special weapon collection available to magicians that increases their damage based on their damage type",
+
+                answer:
+                    "Elemental Wand/Staff"
+            },
+
+            {
+                question:
+                    "What is the name of the Fire/Poison Mage 3rd job summon",
+
+                answer:
+                    "Ifrit"
+            },
+
+            {
+                question:
+                    "Which full map attack skill was famously available to Arch Mages that defined end game grinding",
+
+                answer:
+                    "Meteor Shower / Blizzard / Genesis"
+            },
+
+            {
+                question:
+                    "Which item is needed in order to begin the 3rd Job Advancement quest",
+
+                answer:
+                    "Dark Crystal"
+            },
+
+            {
+                question:
+                    "What was the most expensive skill to use in the game",
+
+                answer:
+                    "Meso Explosion"
+            },
+
+            {
+                question:
+                    "Which skill famously dealt the most potential damage in the game, setting mob HP to 1, and dealing massive damage to bosses",
+
+                answer:
+                    "Heaven's Hammer (Sanctuary)"
+            }
+        ]
+    },
+
+
+    {
+        category: "BOSSES",
+
+        clues: [
+            {
+                question:
+                    "It's a giant mushroom! Maybe it's friendly! Friendly mushroom! Mushy giant friend!",
+
+                answer:
+                    "Mushmom (Appa? But why would Princess Yue need him? She's the moon, she flies by herself)"
+            },
+
+            {
+                question:
+                    "Who is the first (official) boss in MapleStory",
+
+                answer:
+                    "Mano"
+            },
+
+            {
+                question:
+                    "Which boss famously raids the ship to and from Orbis",
+
+                answer:
+                    "Crimson Balrog"
+            },
+
+            {
+                question:
+                    "What is the minimum level required to fight Zakum, The Statue of Dread",
+
+                answer:
+                    "Lv 50"
+            },
+
+            {
+                question:
+                    "Which item is required to summon Zakum, The Statue of Dread",
+
+                answer:
+                    "Eye of Fire"
+            },
+
+            {
+                question:
+                    "Which item is required to summon Ludibrium's strongest boss, Papulatus",
+
+                answer:
+                    "Piece of Cracked Dimension"
+            },
+
+            {
+                question:
+                    "Which boss is associated with the Silver Deputy Star necklace?",
+
+                answer:
+                    "Bigfoot"
+            }
+        ]
+    },
+
+
+    {
+        category: "MAPS",
+
+        clues: [
+            {
+                question:
+                    "Which set of maps infamously required players to use a consumable item received from a quest in order to traverse it without having to go through the multitude of maps it contained",
+
+                answer:
+                    "Orbis Tower (Ludi Tower / Eos Tower also accepted)"
+            },
+
+            {
+                question:
+                    "Which map uses the name of a famous real world city as inspiration for its name",
+
+                answer:
+                    "New Leaf City"
+            },
+
+            {
+                question:
+                    "What is the name of the enemy filled maps in Sleepywood",
+
+                answer:
+                    "Ant Tunnel"
+            },
+
+            {
+                question:
+                    "Which map did players need to visit in order to receive the skill Follow the Lead from Trainer Bartos that allowed you to use up to 3 pets at once",
+
+                answer:
+                    "Henesys Pet-Walking Road (Henesys Jump Quest)"
+            },
+
+            {
+                question:
+                    "What is the name of the town/region based on America's Area 51",
+
+                answer:
+                    "Omega Sector"
+            },
+
+            {
+                question:
+                    "What is the name of the NPC that teleports you deep into Sleepywood's dangerous area for 10,000 meso fee, sometimes trapping low level players there permanently",
+
+                answer:
+                    "VIP Cab"
+            },
+
+            {
+                question:
+                    "What type of transport \"ship\" is used to travel to and from Ludibrium",
+
+                answer:
+                    "Flying Train"
+            }
+        ]
+    },
+
+
+    {
+        category: "OBSCURE KNOWLEDGE",
+
+        clues: [
+            {
+                question:
+                    "What is the name of the first player to hit level 200",
+
+                answer:
+                    "FangBlade"
+            },
+
+            {
+                question:
+                    "What is the term used for people who do nothing but socialize (often in a very specific map)",
+
+                answer:
+                    "\"HeneHoe\""
+            },
+
+            {
+                question:
+                    "What was the original maximum amount of Mesos a player's inventory could hold",
+
+                answer:
+                    "2,147,483,647 ((2^31)-1)"
+            },
+
+            {
+                question:
+                    "What is the name of the system that allows multiple parties to fight a boss together",
+
+                answer:
+                    "Expedition"
+            },
+
+            {
+                question:
+                    "What is the file extension of most of the MapleStory files",
+
+                answer:
+                    ".wz"
+            },
+
+            {
+                question:
+                    "Which patch introduced the first MapleStory Anniversary",
+
+                answer:
+                    "V.62"
+            },
+
+            {
+                question:
+                    "At which map were players able to throw items and mesos onto a rooftop where no one besides hackers were able to reach",
+
+                answer:
+                    "Henesys Market"
+            }
+        ]
+    },
+
+
+    {
+        category: "PARTY QUESTS",
+
+        clues: [
+            {
+                question:
+                    "What items needed to be gathered from the Moon Bunny in the Henesys PQ in order to complete it?",
+
+                answer:
+                    "Moon Bunny's Rice Cakes (Daifuku Mochi/Tteok?)"
+            },
+
+            {
+                question:
+                    "Which boss appeared at the final (non-bonus) stage of Kerning PQ",
+
+                answer:
+                    "King Slime"
+            },
+
+            {
+                question:
+                    "What is the name of the PQ where two parties would race to reach the most points by killing monsters and sabotaging their enemy by summoning monsters or debuffing them",
+
+                answer:
+                    "Monster Carnival PQ (aka the best PQ of all time)"
+            },
+
+            {
+                question:
+                    "Which extremely powerful buff item drops from Amoria PQ",
+
+                answer:
+                    "Onyx Apple"
+            },
+
+            {
+                question:
+                    "Which monsters filled the map of the Ariant PQ",
+
+                answer:
+                    "Scorpions"
+            },
+
+            {
+                question:
+                    "Which PQ required players to take part in a very specific feature of the game in order to be eligible to participate",
+
+                answer:
+                    "Guild PQ (Sharenian Guild Quest)"
+            },
+
+            {
+                question:
+                    "What is the level range required in order to participate in the Ludi Tower PQ",
+
+                answer:
+                    "Lv 35-50"
+            }
+        ]
+    },
+
+
+    {
+        category: "BGM IDENTIFIER",
+
+        clues: [
+
+            {
+                question:
+                    "Which map is this BGM used in?",
+
+                answer:
+                    "Kerning City",
+
+                bgm:
+                    "uv8QObpL2EY"
+            },
+
+            {
+                question:
+                    "Which map is this BGM used in?",
+
+                answer:
+                    "Cash Shop",
+
+                bgm:
+                    "4COWF5TAciY"
+            },
+
+            {
+                question:
+                    "Which map is this BGM used in?",
+
+                answer:
+                    "Temple of Time",
+
+                bgm:
+                    "6uCaEDM-Kf8"
+            },
+
+            {
+                question:
+                    "Which map is this BGM used in?",
+
+                answer:
+                    "Omega Sector",
+
+                bgm:
+                    "LxQt8EVhBOs"
+            },
+
+            {
+                question:
+                    "Which map is this BGM used in?",
+
+                answer:
+                    "Timeless B (Ludibrium)",
+
+                bgm:
+                    "PmuoAR2ce3o"
+            },
+
+            {
+                question:
+                    "Which map is this BGM used in?",
+
+                answer:
+                    "Haunted House (Masteria)",
+
+                bgm:
+                    "nbGQyrGizRQ"
+            },
+
+            {
+                question:
+                    "Which map is this BGM used in?",
+
+                answer:
+                    "CBD (Singapore)",
+
+                bgm:
+                    "czDfxrSGea4"
+            }
+        ]
+    }
+
+];
+
+
+/* =========================================================
+   DOUBLE OR NOTHING DATA
+   ========================================================= */
+
+const doubleOrNothingCategories = [
+
+    {
+        category: "MAPS",
+
+        weight: 5,
+
+        cap: 100,
+
+        prompt:
+            "Name all 22 major towns in Maple World (pre Cygnus Knights).",
+
+        answers: [
+            "Amherst",
+            "Southperry",
+            "Lith Harbor",
+            "Henesys",
+            "Kerning City",
+            "Ellinia",
+            "Perion",
+            "Sleepywood",
+            "Nautilus",
+            "Florina Beach",
+            "Aqua Road",
+            "Orbis",
+            "El-Nath",
+            "Ludibrium",
+            "Korean Folk Town",
+            "Omega Sector",
+            "Mu Lung",
+            "Herb Town",
+            "Ariant",
+            "Magatia",
+            "Leafre",
+            "Temple of Time"
+        ]
+    },
+
+
+    {
+        category: "CLASSES",
+
+        weight: 10,
+
+        cap: 125,
+
+        prompt:
+            "Name all 10 major party buffs.",
+
+        answers: [
+            "Haste",
+            "Hyper Body",
+            "Rage",
+            "Combat Orders",
+            "Sharp Eyes",
+            "Bless",
+            "Holy Symbol",
+            "Meditate",
+            "Speed Infusion",
+            "Maple Warrior"
+        ],
+
+        specialBonus: {
+            name: "Echo of Hero",
+            value: 25
+        }
+    },
+
+
+    {
+        category: "ITEMS",
+
+        weight: 10,
+
+        cap: 100,
+
+        prompt:
+            "Name up to 10 special iconic items that players used to wear, one for each slot (Hat, Eye, Face, Ring (N/A), Cape, Top(N/A), Bottom(N/A), Overall, Necklace, Earrings, Glove, Weapon, Shield, Boots).",
+
+        answers: [
+            "Zakum Helmet",
+            "Scarlion Helmet",
+            "Targa Helmet",
+            "Brown Bamboo Hat",
+            "Bone Helm",
+            "Maple Hat",
+            "Spectrum Goggles",
+            "Broken Glasses",
+            "Raccoon Mask",
+            "White Raccoon Mask",
+            "Owl Mask",
+            "Branch Nose",
+            "Sad/Angry/Smiling Mask",
+            "Strawberry/Watermelon Ice Cream Pop",
+            "Maple Leaf",
+            "Pink Adventurer Cape",
+            "Pink Gaia Cape",
+            "Purple Adventurer Cape",
+            "Purple Gaia Cape",
+            "Old Raggedy Cape",
+            "Bathrobe",
+            "Sauna Robe",
+            "Horntail Necklace",
+            "Silver Deputy Star",
+            "Mark of Naricain",
+            "Spiegelmann's Necklace",
+            "Leaf Earrings",
+            "Crystal Flower Earrings",
+            "Red Cross Earrings",
+            "Sword Earrings",
+            "Work Gloves",
+            "Stormcaster Gloves",
+            "Brown Work Gloves",
+            "Maple Weapons",
+            "Stonetooth Sword",
+            "Maple Shield",
+            "Palette",
+            "Facestompers",
+            "Snowshoes",
+            "Squishy Shoes"
+        ]
+    },
+
+
+    {
+        category: "BOSSES",
+
+        weight: 10,
+
+        cap: 100,
+
+        prompt:
+            "Name up to 10 bosses.",
+
+        answers: [
+            "Mano",
+            "Mushmom",
+            "Blue Mushmom",
+            "Stumpy",
+            "Dyle",
+            "Zombie Mushmom",
+            "Jr Balrog",
+            "Snack Bar",
+            "Crimson Balrog",
+            "Eliza",
+            "Snow Witch",
+            "Nyalmo",
+            "Lich",
+            "Seruf",
+            "Timer",
+            "Rombot",
+            "Chao",
+            "Ephenia",
+            "Targa",
+            "Scarlion",
+            "Manon",
+            "Griffey",
+            "Leviathan",
+            "Tae Roon",
+            "King Sage Cat",
+            "Giant Centipede",
+            "Deo",
+            "Rurumo",
+            "Security Camera",
+            "Chimera",
+            "Deet and Roi",
+            "Dodo",
+            "Lilynouch",
+            "Lyka",
+            "Headless Horseman",
+            "Bigfoot",
+            "Krexel",
+            "Captain Latanica",
+            "King Slime",
+            "Alishar",
+            "Papa Pixie",
+            "Frankenroid",
+            "Poison Golem",
+            "Lord Pirate",
+            "Dragon Rider",
+            "Dragonoir",
+            "Rex",
+            "Geist Balrog",
+            "Margana",
+            "Red Nirg",
+            "Rellik",
+            "Hsalf",
+            "Scarlet Phoenix",
+            "Azure Ocelot",
+            "Pianus",
+            "Papulatus",
+            "Zakum",
+            "Horntail",
+            "Pink Bean",
+            "Lord Balrog",
+            "Female Boss (Anego)",
+            "The Boss",
+            "Ergoth"
+        ]
+    },
+
+
+    {
+        category: "PARTY QUESTS",
+
+        weight: 10,
+
+        cap: 100,
+
+        prompt:
+            "Name up to 10 party quests.",
+
+        answers: [
+            "Henesys PQ",
+            "Kerning City PQ",
+            "Ludi Tower PQ",
+            "Monster Carnival PQ",
+            "Ludi Maze PQ",
+            "Amoria PQ",
+            "Ellin Forest PQ",
+            "Orbis PQ",
+            "Lord Pirate PQ",
+            "Romeo and Juliet PQ",
+            "Crimsonwood Keep PQ",
+            "Dragon Rider PQ",
+            "Shammos PQ",
+            "Guild PQ",
+            "Ariant PQ",
+            "Ghost Ship PQ",
+            "Nett's Pyramid"
+        ]
+    }
+
+];
+
+
+/* =========================================================
+   NORMAL GAME CONSTANTS
+   ========================================================= */
+
+const values = [
+    100,
+    200,
+    300,
+    400,
+    500,
+    600,
+    700
+];
+
+const normalScoreMultipliers = [
+    1,
+    0.75,
+    0.50,
+    0.25,
+    0
+];
+
+
+/* =========================================================
+   NORMAL GAME STATE
+   ========================================================= */
+
+const used = Array.from(
+    { length: 7 },
+    () => Array(7).fill(false)
+);
+
+let score = 0;
+
+let scoreHistory = [];
+
+let currentCategory = -1;
+
+let currentClue = -1;
+
+let answerRevealed = false;
+
+
+/* =========================================================
+   DON STATE
+   ========================================================= */
+
+let doubleOrNothingUsed = false;
+
+let selectedDonCategory = -1;
+
+let donCorrectAnswers = 0;
+
+let donMultiplier = 0;
+
+let donRoundAnswerHistory = [];
+
+let echoBonusAwarded = false;
+
+let finalScore = null;
+
+
+/* =========================================================
+   DOM REFERENCES
+   ========================================================= */
+
+const board =
+    document.getElementById("board");
+
+const scoreElement =
+    document.getElementById("score");
+
+const progressText =
+    document.getElementById("progressText");
+
+const playerNameInput =
+    document.getElementById("playerName");
+
+const undoButton =
+    document.getElementById("undoButton");
+
+const resetButton =
+    document.getElementById("resetButton");
+
+const doubleOrNothingButton =
+    document.getElementById("doubleOrNothingButton");
+
+
+/* NORMAL QUESTION */
+
+const questionBackdrop =
+    document.getElementById("questionBackdrop");
+
+const questionCategory =
+    document.getElementById("questionCategory");
+
+const questionNumber =
+    document.getElementById("questionNumber");
+
+const questionValue =
+    document.getElementById("questionValue");
+
+const questionText =
+    document.getElementById("questionText");
+
+const answerHidden =
+    document.getElementById("answerHidden");
+
+const answerVisible =
+    document.getElementById("answerVisible");
+
+const revealButton =
+    document.getElementById("revealButton");
+
+const closeQuestionButton =
+    document.getElementById("closeQuestionButton");
+
+const correctFirstButton =
+    document.getElementById("correctFirstButton");
+
+const correctSecondButton =
+    document.getElementById("correctSecondButton");
+
+const correctThirdButton =
+    document.getElementById("correctThirdButton");
+
+const correctFourthButton =
+    document.getElementById("correctFourthButton");
+
+const correctFifthButton =
+    document.getElementById("correctFifthButton");
+
+const noScoreButton =
+    document.getElementById("noScoreButton");
+
+
+/* BGM */
+
+const bgmSection =
+    document.getElementById("bgmSection");
+
+const bgmPlayer =
+    document.getElementById("bgmPlayer");
+
+
+/* DON SELECTION */
+
+const selectionBackdrop =
+    document.getElementById("selectionBackdrop");
+
+const categorySelectionGrid =
+    document.getElementById("categorySelectionGrid");
+
+const selectionCount =
+    document.getElementById("selectionCount");
+
+const cancelSelectionButton =
+    document.getElementById("cancelSelectionButton");
+
+const startDonButton =
+    document.getElementById("startDonButton");
+
+
+/* DON */
+
+const donBackdrop =
+    document.getElementById("donBackdrop");
+
+const donCategory =
+    document.getElementById("donCategory");
+
+const donWeight =
+    document.getElementById("donWeight");
+
+const donQuestionText =
+    document.getElementById("donQuestionText");
+
+const donCorrectCount =
+    document.getElementById("donCorrectCount");
+
+const donCurrentBonus =
+    document.getElementById("donCurrentBonus");
+
+const donCorrectButton =
+    document.getElementById("donCorrectButton");
+
+const donUndoButton =
+    document.getElementById("donUndoButton");
+
+const echoBonusButton =
+    document.getElementById("echoBonusButton");
+
+const validAnswersToggle =
+    document.getElementById("validAnswersToggle");
+
+const validAnswers =
+    document.getElementById("validAnswers");
+
+const finishGameButton =
+    document.getElementById("finishGameButton");
+
+
+/* DIAL */
+
+const dialHundreds =
+    document.getElementById("dialHundreds");
+
+const dialTens =
+    document.getElementById("dialTens");
+
+const dialOnes =
+    document.getElementById("dialOnes");
+
+const multiplierValue =
+    document.getElementById("multiplierValue");
+
+const calculatedBonus =
+    document.getElementById("calculatedBonus");
+
+
+/* FINAL */
+
+const finalBackdrop =
+    document.getElementById("finalBackdrop");
+
+const finalPlayerName =
+    document.getElementById("finalPlayerName");
+
+const finalScoreElement =
+    document.getElementById("finalScore");
+
+const finalBreakdown =
+    document.getElementById("finalBreakdown");
+
+
+/* RESET */
+
+const finalResetButton =
+    document.getElementById("finalResetButton");
+
+const confirmBackdrop =
+    document.getElementById("confirmBackdrop");
+
+const cancelResetButton =
+    document.getElementById("cancelResetButton");
+
+const confirmResetButton =
+    document.getElementById("confirmResetButton");
+
+
+/* DIAL CONTROLS */
+
+const dialHundredsUp =
+    document.getElementById("dialHundredsUp");
+
+const dialHundredsDown =
+    document.getElementById("dialHundredsDown");
+
+const dialTensUp =
+    document.getElementById("dialTensUp");
+
+const dialTensDown =
+    document.getElementById("dialTensDown");
+
+const dialOnesUp =
+    document.getElementById("dialOnesUp");
+
+const dialOnesDown =
+    document.getElementById("dialOnesDown");
+
+
+/* =========================================================
+   FORMATTING
+   ========================================================= */
+
+function formatPoints(points) {
+
+    return "$" +
+        Math.round(points).toLocaleString(
+            "en-US"
+        );
+}
+
+
+/* =========================================================
+   NORMAL SCORE CALCULATION
+   ========================================================= */
+
+function getNormalPayout(attemptIndex) {
+
+    if (
+        currentClue < 0 ||
+        attemptIndex < 0 ||
+        attemptIndex >= normalScoreMultipliers.length
+    ) {
+        return 0;
+    }
+
+
+    return Math.round(
+        values[currentClue] *
+        normalScoreMultipliers[attemptIndex]
+    );
+}
+
+
+function updateNormalScoreButtons() {
+
+    if (currentClue < 0) {
+        return;
+    }
+
+
+    const labels = [
+        "Correct First Try",
+        "Correct 2nd Try",
+        "Correct 3rd Try",
+        "Correct 4th Try",
+        "Correct 5th Try"
+    ];
+
+
+    const buttons = [
+        correctFirstButton,
+        correctSecondButton,
+        correctThirdButton,
+        correctFourthButton,
+        correctFifthButton
+    ];
+
+
+    buttons.forEach(
+        (button, index) => {
+
+            button.innerHTML =
+                labels[index] +
+                '<span class="payout">' +
+                formatPoints(
+                    getNormalPayout(index)
+                ) +
+                "</span>";
+        }
+    );
+}
+
+
+function setNormalScoreButtonsEnabled(
+    enabled
+) {
+
+    correctFirstButton.disabled =
+        !enabled;
+
+    correctSecondButton.disabled =
+        !enabled;
+
+    correctThirdButton.disabled =
+        !enabled;
+
+    correctFourthButton.disabled =
+        !enabled;
+
+    correctFifthButton.disabled =
+        !enabled;
+}
+
+
+/* =========================================================
+   BOARD
+   ========================================================= */
+
+function buildBoard() {
+
+    board.innerHTML = "";
+
+
+    for (
+        let categoryIndex = 0;
+        categoryIndex < 7;
+        categoryIndex++
+    ) {
+
+        const categoryElement =
+            document.createElement("div");
+
+        categoryElement.className =
+            "category";
+
+        categoryElement.textContent =
+            gameData[
+                categoryIndex
+            ].category;
+
+        board.appendChild(
+            categoryElement
+        );
+    }
+
+
+    for (
+        let clueIndex = 0;
+        clueIndex < 7;
+        clueIndex++
+    ) {
+
+        for (
+            let categoryIndex = 0;
+            categoryIndex < 7;
+            categoryIndex++
+        ) {
+
+            const button =
+                document.createElement("button");
+
+            button.type =
+                "button";
+
+            button.className =
+                "clue";
+
+            button.textContent =
+                formatPoints(
+                    values[clueIndex]
+                );
+
+
+            if (
+                used[
+                    categoryIndex
+                ][
+                    clueIndex
+                ]
+            ) {
+
+                button.classList.add(
+                    "used"
+                );
+
+                button.disabled =
+                    true;
+            }
+
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    openQuestion(
+                        categoryIndex,
+                        clueIndex
+                    );
+                }
+            );
+
+
+            board.appendChild(
+                button
+            );
+        }
+    }
+}
+
+
+/* =========================================================
+   BGM EMBED
+   ========================================================= */
+
+function showBgmVideo(
+    videoId
+) {
+
+    bgmPlayer.innerHTML =
+        '<iframe ' +
+        'src="https://www.youtube.com/embed/' +
+        encodeURIComponent(videoId) +
+        '?rel=0&controls=1" ' +
+        'title="YouTube video player" ' +
+        'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" ' +
+        'allowfullscreen>' +
+        '</iframe>';
+}
+
+
+/* =========================================================
+   NORMAL QUESTION
+   ========================================================= */
+
+function openQuestion(
+    categoryIndex,
+    clueIndex
+) {
+
+    if (
+        doubleOrNothingUsed ||
+        finalScore !== null
+    ) {
+        return;
+    }
+
+
+    if (
+        used[
+            categoryIndex
+        ][
+            clueIndex
+        ]
+    ) {
+        return;
+    }
+
+
+    currentCategory =
+        categoryIndex;
+
+    currentClue =
+        clueIndex;
+
+    answerRevealed =
+        false;
+
+
+    const clue =
+        gameData[
+            categoryIndex
+        ].clues[
+            clueIndex
+        ];
+
+
+    questionCategory.textContent =
+        gameData[
+            categoryIndex
+        ].category;
+
+
+    questionNumber.textContent =
+        "Clue " +
+        (
+            categoryIndex * 7 +
+            clueIndex +
+            1
+        ) +
+        " of 49";
+
+
+    questionValue.textContent =
+        formatPoints(
+            values[
+                clueIndex
+            ]
+        );
+
+
+    questionText.textContent =
+        clue.question;
+
+
+    answerVisible.textContent =
+        clue.answer;
+
+
+    answerHidden.classList.remove(
+        "hidden"
+    );
+
+
+    answerVisible.classList.add(
+        "hidden"
+    );
+
+
+    revealButton.textContent =
+        "Reveal Answer";
+
+
+    setNormalScoreButtonsEnabled(
+        false
+    );
+
+
+    updateNormalScoreButtons();
+
+
+    bgmSection.style.display =
+        "none";
+
+
+    bgmPlayer.innerHTML =
+        "";
+
+
+    /*
+        Category 7 is the BGM category.
+        No video is created until reveal.
+    */
+
+    if (
+        categoryIndex === 6 &&
+        clue.bgm
+    ) {
+
+        bgmSection.style.display =
+            "block";
+    }
+
+
+    questionBackdrop.classList.remove(
+        "hidden"
+    );
+
+
+    setTimeout(
+        () => {
+            revealButton.focus();
+        },
+        50
+    );
+}
+
+
+function revealNormalAnswer() {
+
+    if (answerRevealed) {
+        return;
+    }
+
+
+    answerRevealed =
+        true;
+
+
+    answerHidden.classList.add(
+        "hidden"
+    );
+
+
+    answerVisible.classList.remove(
+        "hidden"
+    );
+
+
+    revealButton.textContent =
+        "Answer Revealed";
+
+
+    setNormalScoreButtonsEnabled(
+        true
+    );
+
+
+    /*
+        BGM:
+        create the normal YouTube player
+        only after the answer is revealed.
+    */
+
+    if (
+        currentCategory === 6 &&
+        currentClue >= 0
+    ) {
+
+        const clue =
+            gameData[
+                currentCategory
+            ].clues[
+                currentClue
+            ];
+
+
+        if (clue.bgm) {
+
+            showBgmVideo(
+                clue.bgm
+            );
+        }
+    }
+}
+
+
+function scoreByAttempt(
+    attemptIndex
+) {
+
+    if (
+        !answerRevealed ||
+        currentClue < 0
+    ) {
+        return;
+    }
+
+
+    scoreHistory.push(
+        score
+    );
+
+
+    score +=
+        getNormalPayout(
+            attemptIndex
+        );
+
+
+    updateScore();
+
+    markCurrentClueUsed();
+
+    closeQuestion();
+}
+
+
+function markCurrentClueUsed() {
+
+    if (
+        currentCategory < 0 ||
+        currentClue < 0
+    ) {
+        return;
+    }
+
+
+    used[
+        currentCategory
+    ][
+        currentClue
+    ] = true;
+
+
+    buildBoard();
+
+    updateProgress();
+}
+
+
+function closeQuestion() {
+
+    questionBackdrop.classList.add(
+        "hidden"
+    );
+
+
+    bgmPlayer.innerHTML =
+        "";
+
+
+    bgmSection.style.display =
+        "none";
+
+
+    currentCategory =
+        -1;
+
+    currentClue =
+        -1;
+
+    answerRevealed =
+        false;
+
+
+    setNormalScoreButtonsEnabled(
+        false
+    );
+}
+
+
+function noScore() {
+
+    markCurrentClueUsed();
+
+    closeQuestion();
+}
+
+
+function updateScore() {
+
+    const sign =
+        score < 0
+            ? "-"
+            : "";
+
+
+    scoreElement.textContent =
+        sign +
+        formatPoints(
+            Math.abs(score)
+        );
+
+
+    undoButton.disabled =
+        scoreHistory.length === 0;
+}
+
+
+function updateProgress() {
+
+    let count = 0;
+
+
+    for (
+        let categoryIndex = 0;
+        categoryIndex < 7;
+        categoryIndex++
+    ) {
+
+        for (
+            let clueIndex = 0;
+            clueIndex < 7;
+            clueIndex++
+        ) {
+
+            if (
+                used[
+                    categoryIndex
+                ][
+                    clueIndex
+                ]
+            ) {
+
+                count++;
+            }
+        }
+    }
+
+
+    if (count === 49) {
+
+        progressText.textContent =
+            "49 / 49 clues used — BOARD COMPLETE";
+    }
+    else {
+
+        progressText.textContent =
+            count +
+            " / 49 clues used";
+    }
+}
+
+
+/* =========================================================
+   NORMAL SCORE UNDO
+   ========================================================= */
+
+function undoScore() {
+
+    if (
+        scoreHistory.length === 0
+    ) {
+        return;
+    }
+
+
+    score =
+        scoreHistory.pop();
+
+
+    updateScore();
+}
+
+
+/* =========================================================
+   DON CATEGORY SELECTION
+   ========================================================= */
+
+function openCategorySelection() {
+
+    if (
+        doubleOrNothingUsed ||
+        finalScore !== null
+    ) {
+        return;
+    }
+
+
+    categorySelectionGrid.innerHTML =
+        "";
+
+
+    doubleOrNothingCategories.forEach(
+        (
+            category,
+            index
+        ) => {
+
+            const wrapper =
+                document.createElement(
+                    "div"
+                );
+
+            wrapper.className =
+                "category-choice";
+
+
+            const input =
+                document.createElement(
+                    "input"
+                );
+
+            input.type =
+                "radio";
+
+            input.name =
+                "donCategory";
+
+            input.id =
+                "donCategory" +
+                index;
+
+            input.value =
+                index;
+
+
+            const label =
+                document.createElement(
+                    "label"
+                );
+
+            label.htmlFor =
+                input.id;
+
+
+            /*
+                Deliberately DO NOT show
+                the category's weight here.
+            */
+
+            label.textContent =
+                category.category;
+
+
+            input.addEventListener(
+                "change",
+                updateCategorySelection
+            );
+
+
+            wrapper.appendChild(
+                input
+            );
+
+            wrapper.appendChild(
+                label
+            );
+
+
+            categorySelectionGrid.appendChild(
+                wrapper
+            );
+
+        }
+    );
+
+
+    updateCategorySelection();
+
+
+    selectionBackdrop.classList.remove(
+        "hidden"
+    );
+}
+
+
+function updateCategorySelection() {
+
+    const selected =
+        categorySelectionGrid.querySelector(
+            "input:checked"
+        );
+
+
+    if (selected) {
+
+        selectionCount.textContent =
+            "Selected: " +
+            doubleOrNothingCategories[
+                Number(
+                    selected.value
+                )
+            ].category;
+
+        startDonButton.disabled =
+            false;
+    }
+    else {
+
+        selectionCount.textContent =
+            "Choose 1 category";
+
+        startDonButton.disabled =
+            true;
+    }
+}
+
+
+function closeCategorySelection() {
+
+    selectionBackdrop.classList.add(
+        "hidden"
+    );
+}
+
+
+/* =========================================================
+   START DON
+   ========================================================= */
+
+function startDoubleOrNothing() {
+
+    const selected =
+        categorySelectionGrid.querySelector(
+            "input:checked"
+        );
+
+
+    if (!selected) {
+        return;
+    }
+
+
+    selectedDonCategory =
+        Number(
+            selected.value
+        );
+
+
+    const category =
+        doubleOrNothingCategories[
+            selectedDonCategory
+        ];
+
+
+    doubleOrNothingUsed =
+        true;
+
+
+    donCorrectAnswers =
+        0;
+
+
+    donMultiplier =
+        0;
+
+
+    donRoundAnswerHistory =
+        [];
+
+
+    echoBonusAwarded =
+        false;
+
+
+    finalScore =
+        null;
+
+
+    doubleOrNothingButton.disabled =
+        true;
+
+
+    closeCategorySelection();
+
+
+    donCategory.textContent =
+        category.category;
+
+
+    donWeight.textContent =
+        "+" +
+        category.weight +
+        "% per correct answer" +
+        " — maximum +" +
+        category.cap +
+        "%";
+
+
+    donQuestionText.textContent =
+        category.prompt;
+
+
+    buildAnswerBank(
+        category
+    );
+
+
+    validAnswers.classList.add(
+        "hidden"
+    );
+
+
+    validAnswersToggle.textContent =
+        "Show Answer Bank";
+
+
+    validAnswersToggle.disabled =
+        false;
+
+
+    if (
+        category.specialBonus
+    ) {
+
+        echoBonusButton.style.display =
+            "inline-block";
+
+        echoBonusButton.disabled =
+            false;
+    }
+    else {
+
+        echoBonusButton.style.display =
+            "none";
+    }
+
+
+    updateDonDisplay();
+
+
+    donBackdrop.classList.remove(
+        "hidden"
+    );
+
+
+    donCorrectButton.focus();
+}
+
+
+/* =========================================================
+   DON ANSWER BANK
+   ========================================================= */
+
+function buildAnswerBank(
+    category
+) {
+
+    validAnswers.innerHTML =
+        "";
+
+
+    category.answers.forEach(
+        answer => {
+
+            const row =
+                document.createElement(
+                    "div"
+                );
+
+            row.className =
+                "answer-row";
+
+            row.textContent =
+                answer;
+
+            validAnswers.appendChild(
+                row
+            );
+        }
+    );
+
+
+    if (
+        category.specialBonus
+    ) {
+
+        const row =
+            document.createElement(
+                "div"
+            );
+
+        row.className =
+            "answer-row special";
+
+        row.textContent =
+            category.specialBonus.name +
+            " (bonus +" +
+            category.specialBonus.value +
+            "%)";
+
+        validAnswers.appendChild(
+            row
+        );
+    }
+}
+
+
+/* =========================================================
+   REVEAL DON ANSWER BANK
+   ========================================================= */
+
+function revealAnswerBank() {
+
+    if (
+        !doubleOrNothingUsed ||
+        selectedDonCategory < 0
+    ) {
+        return;
+    }
+
+
+    const hidden =
+        validAnswers.classList.contains(
+            "hidden"
+        );
+
+
+    if (hidden) {
+
+        validAnswers.classList.remove(
+            "hidden"
+        );
+
+        validAnswersToggle.textContent =
+            "Hide Answer Bank";
+    }
+    else {
+
+        validAnswers.classList.add(
+            "hidden"
+        );
+
+        validAnswersToggle.textContent =
+            "Show Answer Bank";
+    }
+
+}
+
+
+/* =========================================================
+   DON CORRECT ANSWER
+   ========================================================= */
+
+function addDonCorrectAnswer() {
+
+    if (
+        selectedDonCategory < 0
+    ) {
+        return;
+    }
+
+
+    const category =
+        doubleOrNothingCategories[
+            selectedDonCategory
+        ];
+
+
+    const oldMultiplier =
+        donMultiplier;
+
+
+    donRoundAnswerHistory.push(
+        {
+            multiplier: oldMultiplier,
+            correctAnswers: donCorrectAnswers,
+            echoBonus: echoBonusAwarded
+        }
+    );
+
+
+    donCorrectAnswers++;
+
+
+    donMultiplier =
+        Math.min(
+            category.cap,
+            donMultiplier +
+            category.weight
+        );
+
+
+    updateDonDisplay();
+}
+
+
+/* =========================================================
+   ECHO OF HERO BONUS
+   ========================================================= */
+
+function awardEchoBonus() {
+
+    if (
+        selectedDonCategory < 0 ||
+        echoBonusAwarded
+    ) {
+        return;
+    }
+
+
+    const category =
+        doubleOrNothingCategories[
+            selectedDonCategory
+        ];
+
+
+    if (
+        !category.specialBonus
+    ) {
+        return;
+    }
+
+
+    donRoundAnswerHistory.push(
+        {
+            multiplier: donMultiplier,
+            correctAnswers: donCorrectAnswers,
+            echoBonus: echoBonusAwarded
+        }
+    );
+
+
+    echoBonusAwarded =
+        true;
+
+
+    donMultiplier =
+        Math.min(
+            category.cap,
+            donMultiplier +
+            category.specialBonus.value
+        );
+
+
+    echoBonusButton.disabled =
+        true;
+
+
+    updateDonDisplay();
+}
+
+
+/* =========================================================
+   DON UNDO
+   ========================================================= */
+
+function undoDonAnswer() {
+
+    if (
+        donRoundAnswerHistory.length === 0
+    ) {
+        return;
+    }
+
+
+    const previous =
+        donRoundAnswerHistory.pop();
+
+
+    donMultiplier =
+        previous.multiplier;
+
+
+    donCorrectAnswers =
+        previous.correctAnswers;
+
+
+    echoBonusAwarded =
+        previous.echoBonus;
+
+
+    echoBonusButton.disabled =
+        echoBonusAwarded;
+
+
+    updateDonDisplay();
+}
+
+
+/* =========================================================
+   DON DISPLAY
+   ========================================================= */
+
+function updateDonDisplay() {
+
+    donCorrectCount.textContent =
+        donCorrectAnswers;
+
+
+    donCurrentBonus.textContent =
+        "+" +
+        donMultiplier +
+        "%";
+
+
+    let answerBonus =
+        0;
+
+
+    let specialBonus =
+        0;
+
+
+    if (
+        selectedDonCategory >= 0
+    ) {
+
+        const category =
+            doubleOrNothingCategories[
+                selectedDonCategory
+            ];
+
+
+        answerBonus =
+            Math.min(
+                category.cap,
+                donCorrectAnswers *
+                category.weight
+            );
+
+
+        if (
+            category.specialBonus &&
+            echoBonusAwarded
+        ) {
+
+            specialBonus =
+                category.specialBonus.value;
+        }
+    }
+
+
+    const calculated =
+        Math.min(
+            selectedDonCategory >= 0
+                ? doubleOrNothingCategories[
+                    selectedDonCategory
+                ].cap
+                : 100,
+
+            answerBonus +
+            specialBonus
+        );
+
+
+    calculatedBonus.textContent =
+        "Answer bonus: +" +
+        calculated +
+        "%";
+
+
+    donUndoButton.disabled =
+        donRoundAnswerHistory.length === 0;
+
+
+    updateDial();
+}
+
+
+/* =========================================================
+   DON DIAL
+   ========================================================= */
+
+function getDonCap() {
+
+    if (
+        selectedDonCategory < 0
+    ) {
+        return 100;
+    }
+
+
+    return doubleOrNothingCategories[
+        selectedDonCategory
+    ].cap;
+}
+
+
+function setDialValue(value) {
+
+    const cap =
+        getDonCap();
+
+
+    donMultiplier =
+        Math.max(
+            0,
+            Math.min(
+                cap,
+                Math.round(value)
+            )
+        );
+
+
+    updateDial();
+}
+
+
+function updateDial() {
+
+    const cap =
+        getDonCap();
+
+
+    donMultiplier =
+        Math.max(
+            0,
+            Math.min(
+                cap,
+                Math.round(
+                    donMultiplier
+                )
+            )
+        );
+
+
+    const value =
+        donMultiplier;
+
+
+    dialHundreds.textContent =
+        Math.floor(
+            value / 100
+        );
+
+
+    dialTens.textContent =
+        Math.floor(
+            (value % 100) / 10
+        );
+
+
+    dialOnes.textContent =
+        value % 10;
+
+
+    multiplierValue.textContent =
+        "+" +
+        value +
+        "%";
+
+
+    /*
+        Disable the hundreds-up control
+        when the cap is reached.
+    */
+
+    const atCap =
+        value >= cap;
+
+
+    dialHundredsUp.disabled =
+        atCap;
+
+    dialTensUp.disabled =
+        atCap;
+
+    dialOnesUp.disabled =
+        atCap;
+
+}
+
+
+/*
+    Increase/decrease individual dial digits.
+
+    The value is always clamped to the
+    category's maximum.
+*/
+
+function changeDialDigit(
+    position,
+    amount
+) {
+
+    const cap =
+        getDonCap();
+
+
+    let value =
+        donMultiplier;
+
+
+    if (
+        position === "hundreds"
+    ) {
+
+        let digit =
+            Math.floor(
+                value / 100
+            );
+
+
+        digit =
+            (
+                digit +
+                amount +
+                10
+            ) % 10;
+
+
+        value =
+            (
+                value % 100
+            ) +
+            digit * 100;
+
+    }
+
+
+    else if (
+        position === "tens"
+    ) {
+
+        let digit =
+            Math.floor(
+                (value % 100) / 10
+            );
+
+
+        digit =
+            (
+                digit +
+                amount +
+                10
+            ) % 10;
+
+
+        value =
+            Math.floor(
+                value / 100
+            ) * 100 +
+            digit * 10 +
+            value % 10;
+
+    }
+
+
+    else if (
+        position === "ones"
+    ) {
+
+        let digit =
+            value % 10;
+
+
+        digit =
+            (
+                digit +
+                amount +
+                10
+            ) % 10;
+
+
+        value =
+            Math.floor(
+                value / 10
+            ) * 10 +
+            digit;
+
+    }
+
+
+    value =
+        Math.max(
+            0,
+            Math.min(
+                cap,
+                value
+            )
+        );
+
+
+    setDialValue(
+        value
+    );
+}
+
+
+/* =========================================================
+   FINISH GAME
+   ========================================================= */
+
+function finishDoubleOrNothing() {
+
+    const baseScore =
+        score;
+
+
+    const bonus =
+        Math.max(
+            0,
+            Math.min(
+                getDonCap(),
+                Math.round(
+                    donMultiplier
+                )
+            )
+        );
+
+
+    const finalMultiplier =
+        1 +
+        (
+            bonus /
+            100
+        );
+
+
+    finalScore =
+        Math.round(
+            baseScore *
+            finalMultiplier
+        );
+
+
+    const playerName =
+        playerNameInput.value.trim() ||
+        "Player 1";
+
+
+    finalPlayerName.textContent =
+        playerName;
+
+
+    finalScoreElement.textContent =
+        formatPoints(
+            finalScore
+        );
+
+
+    const category =
+        doubleOrNothingCategories[
+            selectedDonCategory
+        ];
+
+
+    finalBreakdown.innerHTML =
+        "<strong>Base score:</strong> " +
+        formatPoints(
+            baseScore
+        ) +
+        "<br>" +
+
+        "<strong>Double or Nothing category:</strong> " +
+        category.category +
+        "<br>" +
+
+        "<strong>Correct items:</strong> " +
+        donCorrectAnswers +
+        "<br>" +
+
+        "<strong>Echo of Hero bonus:</strong> " +
+        (
+            echoBonusAwarded
+                ? "+25%"
+                : "+0%"
+        ) +
+        "<br>" +
+
+        "<strong>Final bonus:</strong> +" +
+        bonus +
+        "%" +
+        "<br>" +
+
+        "<strong>Final multiplier:</strong> " +
+        finalMultiplier.toFixed(
+            2
+        ) +
+        "x";
+
+
+    donBackdrop.classList.add(
+        "hidden"
+    );
+
+
+    finalBackdrop.classList.remove(
+        "hidden"
+    );
+
+
+    buildBoard();
+}
+
+
+/* =========================================================
+   RESET
+   ========================================================= */
+
+function openResetConfirmation() {
+
+    confirmBackdrop.classList.remove(
+        "hidden"
+    );
+}
+
+
+function closeResetConfirmation() {
+
+    confirmBackdrop.classList.add(
+        "hidden"
+    );
+}
+
+
+function resetGame() {
+
+    score = 0;
+
+    scoreHistory = [];
+
+
+    for (
+        let categoryIndex = 0;
+        categoryIndex < 7;
+        categoryIndex++
+    ) {
+
+        for (
+            let clueIndex = 0;
+            clueIndex < 7;
+            clueIndex++
+        ) {
+
+            used[
+                categoryIndex
+            ][
+                clueIndex
+            ] = false;
+
+        }
+
+    }
+
+
+    currentCategory =
+        -1;
+
+    currentClue =
+        -1;
+
+    answerRevealed =
+        false;
+
+
+    doubleOrNothingUsed =
+        false;
+
+    selectedDonCategory =
+        -1;
+
+    donCorrectAnswers =
+        0;
+
+    donMultiplier =
+        0;
+
+    donRoundAnswerHistory =
+        [];
+
+    echoBonusAwarded =
+        false;
+
+    finalScore =
+        null;
+
+
+    questionBackdrop.classList.add(
+        "hidden"
+    );
+
+    selectionBackdrop.classList.add(
+        "hidden"
+    );
+
+    donBackdrop.classList.add(
+        "hidden"
+    );
+
+    finalBackdrop.classList.add(
+        "hidden"
+    );
+
+    confirmBackdrop.classList.add(
+        "hidden"
+    );
+
+
+    doubleOrNothingButton.disabled =
+        false;
+
+
+    echoBonusButton.style.display =
+        "none";
+
+    echoBonusButton.disabled =
+        false;
+
+
+    validAnswers.classList.add(
+        "hidden"
+    );
+
+    validAnswersToggle.textContent =
+        "Show Answer Bank";
+
+    validAnswersToggle.disabled =
+        true;
+
+
+    updateScore();
+
+    updateProgress();
+
+    updateDonDisplay();
+
+    buildBoard();
+
+}
+
+
+/* =========================================================
+   EVENT LISTENERS
+   ========================================================= */
+
+revealButton.addEventListener(
+    "click",
+    revealNormalAnswer
+);
+
+
+closeQuestionButton.addEventListener(
+    "click",
+    closeQuestion
+);
+
+
+correctFirstButton.addEventListener(
+    "click",
+    () => {
+        scoreByAttempt(0);
+    }
+);
+
+
+correctSecondButton.addEventListener(
+    "click",
+    () => {
+        scoreByAttempt(1);
+    }
+);
+
+
+correctThirdButton.addEventListener(
+    "click",
+    () => {
+        scoreByAttempt(2);
+    }
+);
+
+
+correctFourthButton.addEventListener(
+    "click",
+    () => {
+        scoreByAttempt(3);
+    }
+);
+
+
+correctFifthButton.addEventListener(
+    "click",
+    () => {
+        scoreByAttempt(4);
+    }
+);
+
+
+noScoreButton.addEventListener(
+    "click",
+    noScore
+);
+
+
+undoButton.addEventListener(
+    "click",
+    undoScore
+);
+
+
+doubleOrNothingButton.addEventListener(
+    "click",
+    openCategorySelection
+);
+
+
+cancelSelectionButton.addEventListener(
+    "click",
+    closeCategorySelection
+);
+
+
+startDonButton.addEventListener(
+    "click",
+    startDoubleOrNothing
+);
+
+
+donCorrectButton.addEventListener(
+    "click",
+    addDonCorrectAnswer
+);
+
+
+donUndoButton.addEventListener(
+    "click",
+    undoDonAnswer
+);
+
+
+echoBonusButton.addEventListener(
+    "click",
+    awardEchoBonus
+);
+
+
+validAnswersToggle.addEventListener(
+    "click",
+    revealAnswerBank
+);
+
+
+finishGameButton.addEventListener(
+    "click",
+    finishDoubleOrNothing
+);
+
+
+/* =========================================================
+   DIAL EVENTS
+   ========================================================= */
+
+dialHundredsUp.addEventListener(
+    "click",
+    () => {
+        changeDialDigit(
+            "hundreds",
+            1
+        );
+    }
+);
+
+
+dialHundredsDown.addEventListener(
+    "click",
+    () => {
+        changeDialDigit(
+            "hundreds",
+            -1
+        );
+    }
+);
+
+
+dialTensUp.addEventListener(
+    "click",
+    () => {
+        changeDialDigit(
+            "tens",
+            1
+        );
+    }
+);
+
+
+dialTensDown.addEventListener(
+    "click",
+    () => {
+        changeDialDigit(
+            "tens",
+            -1
+        );
+    }
+);
+
+
+dialOnesUp.addEventListener(
+    "click",
+    () => {
+        changeDialDigit(
+            "ones",
+            1
+        );
+    }
+);
+
+
+dialOnesDown.addEventListener(
+    "click",
+    () => {
+        changeDialDigit(
+            "ones",
+            -1
+        );
+    }
+);
+
+
+/* =========================================================
+   RESET EVENTS
+   ========================================================= */
+
+resetButton.addEventListener(
+    "click",
+    openResetConfirmation
+);
+
+
+cancelResetButton.addEventListener(
+    "click",
+    closeResetConfirmation
+);
+
+
+confirmResetButton.addEventListener(
+    "click",
+    resetGame
+);
+
+
+finalResetButton.addEventListener(
+    "click",
+    resetGame
+);
+
+
+/* =========================================================
+   KEYBOARD
+   ========================================================= */
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if (
+            event.key === "Escape"
+        ) {
+
+            if (
+                !questionBackdrop.classList.contains(
+                    "hidden"
+                )
+            ) {
+
+                closeQuestion();
+
+                return;
+            }
+
+
+            if (
+                !selectionBackdrop.classList.contains(
+                    "hidden"
+                )
+            ) {
+
+                closeCategorySelection();
+
+                return;
+            }
+
+
+            if (
+                !confirmBackdrop.classList.contains(
+                    "hidden"
+                )
+            ) {
+
+                closeResetConfirmation();
+
+                return;
+            }
+        }
+
+
+        /*
+            Space reveals a normal question.
+            It does not interfere with text inputs.
+        */
+
+        if (
+            event.code === "Space" &&
+            !questionBackdrop.classList.contains(
+                "hidden"
+            ) &&
+            !answerRevealed
+        ) {
+
+            const active =
+                document.activeElement;
+
+
+            const editing =
+                active &&
+                (
+                    active.tagName ===
+                    "INPUT" ||
+                    active.tagName ===
+                    "TEXTAREA"
+                );
+
+
+            if (!editing) {
+
+                event.preventDefault();
+
+                revealNormalAnswer();
+            }
+        }
+
+    }
+);
+
+
+/* =========================================================
+   INITIALIZATION
+   ========================================================= */
+
+buildBoard();
+
+updateScore();
+
+updateProgress();
+
+updateDonDisplay();
+
+</script>
+
+</body>
+</html>
